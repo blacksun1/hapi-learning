@@ -25,21 +25,21 @@ const options = {
 			"events": {
 				"response": "*"
 			},
-			"config": "./response.log"
+			"config": "./logs/response.log"
 		},
 		{
 			"reporter": require("good-file"),
 			"events": {
 				"log": "*"
 			},
-			"config": "./log.log"
+			"config": "./logs/log.log"
 		},
 		{
 			"reporter": require("good-file"),
 			"events": {
 				"ops": "*"
 			},
-			"config": "./ops.log"
+			"config": "./logs/ops.log"
 		}
 	]
 };
