@@ -1,0 +1,8 @@
+{
+    "apps" : [{
+        "name": "hapi-learning",
+        "script": "index.js",
+        "watch": true,
+        "instances": 4
+    }]
+}
