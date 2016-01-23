@@ -46,7 +46,7 @@ const options = {
 
 server.route({
     "method": 'GET',
-    "path": '/',
+    "path": "/",
     "handler": function(request, reply) {
         server.log(["test"], {"message": "I really like cake"});
         reply(`<h1>Hello, world!</h1><p>Count is ${counter}</p>`);
@@ -54,11 +54,16 @@ server.route({
     }
 });
 
-Q.ninvoke(server, "register", {
+Q(server.register({
 		register: require("good"),
 		options: options
-	})
-	.then(Q.ninvoke(server, "start", () => {
-		console.log(`Server with index ${process.env["NODE_APP_INSTANCE"]} running at: ${server.info.uri}`);
 	}))
+	.then(() => server.start())
+	.then(() => {
+		console.log(`Server with index ${process.env["NODE_APP_INSTANCE"]} running at: ${server.info.uri}`);
+	})
+	.then(() => Q(null))
+	.catch((err) => {
+		console.log(`An error occured: ${err}`);
+	})
 	.done();
