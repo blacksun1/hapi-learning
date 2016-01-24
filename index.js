@@ -3,8 +3,8 @@
 const Hapi = require("hapi");
 const Q = require("q");
 const Bcrypt = require("bcrypt");
-
-let counter = 0;
+const glob = require("glob");
+const path = require("path");
 
 const server = new Hapi.Server();
 server.connection({
@@ -54,46 +54,16 @@ Q(server.register([
         ]))
     // Register routes
     .then(() => {
+        // Setup authentication strategy
         server.auth.strategy("BasicAuthentication", "basic", {
             "validateFunc": validateUser
         });
 
-        server.route({
-            "method": "GET",
-            "path": "/",
-            "handler": function(request, reply) {
-                server.log(["test"], {"message": "Hello World!"});
-                counter++;
-                return reply({
-                    "message": "Hello, world!",
-                    "counter": counter
-                });
-            },
-            "config": {
-                "description": "Hello World!",
-                "notes": "Also returns an internal counter of the number of times the method has been called.",
-                "tags": ["api", "secure"],
-
-                "auth": "BasicAuthentication"
-            }
-        });
-
-        server.route({
-            "method": "GET",
-            "path": "/hello/{user?}",
-            "handler": function (request, reply) {
-                const name = typeof request.params.user === "undefined" ? "stranger" : request.params.user;
-                return reply({
-                    "message": `Hello ${name}, is it me you're looking for?`
-                });
-            },
-            "config": {
-                "description": "Says hello",
-                "notes": "{user} defaults to stranger if not provided.",
-                "tags": ["api", "greeting", "secure"],
-
-                "auth": "BasicAuthentication"
-            }
+        // Setup routes
+        glob.sync("./routes/**/*.js").forEach(function(file) {
+            const route = require(path.resolve(file))(server);
+            server.log(["debug", "route"], {"message": "Initialising route", "route": {file, route}});
+            server.route(route);
         });
 
     })
@@ -106,6 +76,7 @@ Q(server.register([
     // If HAPI doesn't start up then log it to the console.
     .catch((err) => {
         console.error(`[FATAL] An error occured: ${err}`);
+        console.error(err.stack);
         process.exit(1);
     })
     // Finish the promise chain
